@@ -65,11 +65,11 @@ if __name__ == "__main__":
     print(data_str)
 
     """ Hyperparameters """
-    H = 512
-    W = 512
+    H = 256
+    W = 128
     size = (H, W)
     batch_size = 2
-    num_epochs = 20
+    num_epochs = 10
     lr = 1e-4
     checkpoint_path = "files/checkpoint.pth"
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
         num_workers=2
     )
 
-    device = torch.device('cpu')   ## GTX 1060 6GB
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = build_unet()
     model = model.to(device)
 
@@ -101,25 +101,31 @@ if __name__ == "__main__":
 
     """ Training the model """
     best_valid_loss = float("inf")
+    with open('train_val_loss.txt', 'w') as file:
 
-    for epoch in range(num_epochs):
-        start_time = time.time()
+        for epoch in range(num_epochs):
+            start_time = time.time()
 
-        train_loss = train(model, train_loader, optimizer, loss_fn, device)
-        valid_loss = evaluate(model, valid_loader, loss_fn, device)
+            train_loss = train(model, train_loader, optimizer, loss_fn, device)
+            valid_loss = evaluate(model, valid_loader, loss_fn, device)
 
-        """ Saving the model """
-        if valid_loss < best_valid_loss:
-            data_str = f"Valid loss improved from {best_valid_loss:2.4f} to {valid_loss:2.4f}. Saving checkpoint: {checkpoint_path}"
+            """ Saving the model """
+            if valid_loss < best_valid_loss:
+                data_str = f"Valid loss improved from {best_valid_loss:2.4f} to {valid_loss:2.4f}"
+                print(data_str)
+
+                file.write(data_str + '\n')
+
+                best_valid_loss = valid_loss
+                torch.save(model.state_dict(), checkpoint_path)
+
+            end_time = time.time()
+            epoch_mins, epoch_secs = epoch_time(start_time, end_time)
+
+            data_str = f'Epoch: {epoch+1:02} | Epoch Time: {epoch_mins}m {epoch_secs}s\n'
+            data_str += f'\tTrain Loss: {train_loss:.3f}\n'
+            data_str += f'\t Val. Loss: {valid_loss:.3f}\n'
             print(data_str)
 
-            best_valid_loss = valid_loss
-            torch.save(model.state_dict(), checkpoint_path)
+            file.write(data_str + '\n')
 
-        end_time = time.time()
-        epoch_mins, epoch_secs = epoch_time(start_time, end_time)
-
-        data_str = f'Epoch: {epoch+1:02} | Epoch Time: {epoch_mins}m {epoch_secs}s\n'
-        data_str += f'\tTrain Loss: {train_loss:.3f}\n'
-        data_str += f'\t Val. Loss: {valid_loss:.3f}\n'
-        print(data_str)

@@ -22,7 +22,7 @@ def load_data(path):
     return (train_x, train_y), (test_x, test_y)
 
 def augment_data(images, masks, save_path, augment=True):
-    size = (512, 512)
+    size = (256, 128)
 
     for idx, (x, y) in tqdm(enumerate(zip(images, masks)), total=len(images)):
         """ Extracting the name """
@@ -55,10 +55,12 @@ def augment_data(images, masks, save_path, augment=True):
             x2 = augmented["image"]
             y2 = augmented["mask"]
 
-            aug = Rotate(limit=45, p=1.0)
+            aug = Rotate(limit=5, p=1.0)
             augmented = aug(image=x, mask=y)
             x3 = augmented["image"]
             y3 = augmented["mask"]
+
+        
 
             X = [x, x1, x2, x3]
             Y = [y, y1, y2, y3]
