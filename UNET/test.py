@@ -12,6 +12,10 @@ from sklearn.metrics import accuracy_score, f1_score, jaccard_score, precision_s
 from model import build_unet
 from utils import create_dir, seeding
 
+
+
+
+
 def calculate_metrics(y_true, y_pred):
     """ Ground truth """
     y_true = y_true.cpu().numpy()
@@ -43,17 +47,19 @@ if __name__ == "__main__":
     seeding(42)
 
     """ Folders """
-    create_dir("results")
+    # create_dir("results")
 
     """ Load dataset """
-    test_x = sorted(glob("new_data/test/image/*"))
-    test_y = sorted(glob("new_data/test/mask/*"))
+    test_x = sorted(glob("new_data/test/image/*"))[900:1000]
+    test_y = sorted(glob("new_data/test/gland/*"))[900:1000]
+    # test_y = sorted(glob("new_data/test/mask/*"))[900:1000]
 
    
 
     """ Hyperparameters """
-    H = 256
-    W = 128
+    W = 256
+    H = 128
+    
     size = (W, H)
     checkpoint_path = "files/checkpoint.pth"
 

@@ -11,6 +11,11 @@ from data import DriveDataset
 from model import build_unet
 from loss import DiceLoss, DiceBCELoss
 from utils import seeding, create_dir, epoch_time
+import matplotlib.pyplot as plt
+
+
+
+
 
 def train(model, loader, optimizer, loss_fn, device):
     epoch_loss = 0.0
@@ -55,11 +60,13 @@ if __name__ == "__main__":
     create_dir("files")
 
     """ Load dataset """
-    train_x = sorted(glob("new_data/train/image/*"))[:20]
-    train_y = sorted(glob("new_data/train/mask/*"))[:20]
+    train_x = sorted(glob("new_data/train/image/*"))[:3600]
+    train_y = sorted(glob("new_data/train/gland/*"))[:3600]
+    # train_y = sorted(glob("new_data/train/mask/*"))[:3600]
 
-    valid_x = sorted(glob("new_data/test/image/*"))
-    valid_y = sorted(glob("new_data/test/mask/*"))
+    valid_x = sorted(glob("new_data/test/image/*"))[900:1000]
+    valid_y = sorted(glob("new_data/test/gland/*"))[900:1000]
+    # valid_y = sorted(glob("new_data/test/mask/*"))[900:1000]
 
     data_str = f"Dataset Size:\nTrain: {len(train_x)} - Valid: {len(valid_x)}\n"
     print(data_str)
@@ -69,7 +76,7 @@ if __name__ == "__main__":
     W = 128
     size = (H, W)
     batch_size = 2
-    num_epochs = 10
+    num_epochs = 12
     lr = 1e-4
     checkpoint_path = "files/checkpoint.pth"
 
@@ -101,6 +108,9 @@ if __name__ == "__main__":
 
     """ Training the model """
     best_valid_loss = float("inf")
+
+    train_losses = []
+    valid_losses = []
     with open('train_val_loss.txt', 'w') as file:
 
         for epoch in range(num_epochs):
@@ -108,6 +118,9 @@ if __name__ == "__main__":
 
             train_loss = train(model, train_loader, optimizer, loss_fn, device)
             valid_loss = evaluate(model, valid_loader, loss_fn, device)
+
+            train_losses.append(train_loss)
+            valid_losses.append(valid_loss)
 
             """ Saving the model """
             if valid_loss < best_valid_loss:
@@ -128,4 +141,26 @@ if __name__ == "__main__":
             print(data_str)
 
             file.write(data_str + '\n')
+
+        plt.plot(range(1, num_epochs + 1), valid_losses, label='Validation Loss', marker='o', linestyle='-')
+        plt.xlabel('Epoch')
+        plt.ylabel('Validation Loss')
+        plt.title('Epoch vs. Validation Loss')
+        plt.grid(True)
+        plt.legend()
+        # plt.show()
+        plt.xticks(range(1, num_epochs + 1))
+        plt.savefig('validation_loss_graph.png')
+
+
+        plt.plot(range(1, num_epochs + 1), train_losses, label='Train Loss', marker='o', linestyle='-')
+        plt.xlabel('Epoch')
+        plt.ylabel('Losses')
+        plt.title('Epoch vs. Validation and Train Loss')
+        plt.grid(True)
+        plt.legend()
+        # plt.show()
+        plt.xticks(range(1, num_epochs + 1))
+        plt.savefig('loss_graph.png')
+
 
