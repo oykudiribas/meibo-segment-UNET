@@ -11,7 +11,9 @@ from sklearn.metrics import accuracy_score, f1_score, jaccard_score, precision_s
 
 from model import build_unet
 from utils import create_dir, seeding
+from histmatch import clear_output_directory
 
+clear_output_directory("results")
 
 
 
@@ -57,8 +59,8 @@ if __name__ == "__main__":
    
 
     """ Hyperparameters """
-    W = 256
-    H = 128
+    W = 1280
+    H = 640
     
     size = (W, H)
     checkpoint_path = "files/checkpoint.pth"

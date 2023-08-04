@@ -72,11 +72,11 @@ if __name__ == "__main__":
     print(data_str)
 
     """ Hyperparameters """
-    H = 256
-    W = 128
+    H = 480
+    W = 640
     size = (H, W)
     batch_size = 2
-    num_epochs = 12
+    num_epochs = 20
     lr = 1e-4
     checkpoint_path = "files/checkpoint.pth"
 
